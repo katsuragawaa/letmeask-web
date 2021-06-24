@@ -38,21 +38,25 @@ type FirebaseQuestions = Record<
 >;
 
 export function Room() {
-  const { user } = useAuth();
-  const params = useParams<RoomParams>();
+  const { user } = useAuth(); // custom hook para contexto de autentificação
+  const params = useParams<RoomParams>(); // hook para ter acesso aos parâmetros da url
   const [newQuestion, setNewQuestion] = useState("");
   const [questions, setQuestions] = useState<Question[]>([]);
   const [title, setTitle] = useState("");
 
-  const roomId = params.id;
+  const roomId = params.id; // id da sala passada na url
 
+  // efeito colateral para quando o id muda
   useEffect(() => {
+    // define qual referência do banco de dados acessar
     const roomRef = database.ref(`rooms/${roomId}`);
 
+    // busca no banco de dados e retorna todo o valor dentro dele
     roomRef.on("value", (room) => {
-      const databaseRoom = room.val();
-      const firebaseQuestions: FirebaseQuestions = databaseRoom.questions ?? {};
+      const databaseRoom = room.val(); // extrai JSON do DatabaseSnapshot, que é uma cópia do que está no banco de dados
+      const firebaseQuestions: FirebaseQuestions = databaseRoom.questions ?? {}; // seleciona somente as perguntas da sala
 
+      // transforma o JSON em array de pares com [key, value] e retorna o objeto formatado
       const parsedQuestions = Object.entries(firebaseQuestions).map(
         ([key, value]) => {
           return {
@@ -64,11 +68,13 @@ export function Room() {
           };
         }
       );
+      // atualiza os estados
       setTitle(databaseRoom.title);
       setQuestions(parsedQuestions);
     });
   }, [roomId]);
 
+  // envia pergunta ao banco de dados
   async function handleSendQuestion(event: FormEvent) {
     event.preventDefault();
 
@@ -80,6 +86,7 @@ export function Room() {
       throw new Error("Usuário não está logado");
     }
 
+    // cria o objeto
     const question = {
       content: newQuestion,
       author: {

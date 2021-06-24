@@ -1,10 +1,12 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { useRoom } from "../hooks/useRoom";
 
 import logoImg from "../assets/images/logo.svg";
 import { Button } from "../components/Button";
 import { RoomCode } from "../components/RoomCode";
+import { Question } from "../components/Question";
 
 import "../styles/room.scss";
 import { database } from "../services/firebase";
@@ -13,66 +15,13 @@ type RoomParams = {
   id: string;
 };
 
-type Question = {
-  id: string;
-  author: {
-    name: string;
-    avatar: string;
-  };
-  content: string;
-  isAnswered: string;
-  isHighlighted: string;
-};
-
-type FirebaseQuestions = Record<
-  string,
-  {
-    author: {
-      name: string;
-      avatar: string;
-    };
-    content: string;
-    isAnswered: string;
-    isHighlighted: string;
-  }
->;
-
 export function Room() {
   const { user } = useAuth(); // custom hook para contexto de autentificação
   const params = useParams<RoomParams>(); // hook para ter acesso aos parâmetros da url
   const [newQuestion, setNewQuestion] = useState("");
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [title, setTitle] = useState("");
 
   const roomId = params.id; // id da sala passada na url
-
-  // efeito colateral para quando o id muda
-  useEffect(() => {
-    // define qual referência do banco de dados acessar
-    const roomRef = database.ref(`rooms/${roomId}`);
-
-    // busca no banco de dados e retorna todo o valor dentro dele
-    roomRef.on("value", (room) => {
-      const databaseRoom = room.val(); // extrai JSON do DatabaseSnapshot, que é uma cópia do que está no banco de dados
-      const firebaseQuestions: FirebaseQuestions = databaseRoom.questions ?? {}; // seleciona somente as perguntas da sala
-
-      // transforma o JSON em array de pares com [key, value] e retorna o objeto formatado
-      const parsedQuestions = Object.entries(firebaseQuestions).map(
-        ([key, value]) => {
-          return {
-            id: key,
-            content: value.content,
-            author: value.author,
-            isHighlighted: value.isAnswered,
-            isAnswered: value.isAnswered,
-          };
-        }
-      );
-      // atualiza os estados
-      setTitle(databaseRoom.title);
-      setQuestions(parsedQuestions);
-    });
-  }, [roomId]);
+  const { questions, title } = useRoom(roomId); // custom hook que lida com a busca das perguntas no banco de dados
 
   // envia pergunta ao banco de dados
   async function handleSendQuestion(event: FormEvent) {
@@ -113,7 +62,7 @@ export function Room() {
       <main>
         <div className="room-title">
           <h1>Sala {title}</h1>
-          { questions.length > 0 && <span>{questions.length} pergunta(s)</span> }
+          {questions.length > 0 && <span>{questions.length} pergunta(s)</span>}
         </div>
 
         <form onSubmit={handleSendQuestion}>
@@ -140,8 +89,15 @@ export function Room() {
             </Button>
           </div>
         </form>
-
-        {JSON.stringify(questions)}
+        <div className="question-list">
+          {questions.map((question) => (
+            <Question
+              key={question.id}
+              content={question.content}
+              author={question.author}
+            />
+          ))}
+        </div>
       </main>
     </div>
   );

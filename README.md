@@ -2,7 +2,7 @@
 
 O Letmeask é uma plataforma para auxiliar streamers / criadores de conteúdos / influenciadores a interagir com sua audiência.
 
-![image-20210624132251609](\design\image-20210624132251609.png)
+![image-20210624132251609](/design/image-20210624132251609)
 
 Crie sua sala e compartilhe a *ID* para os *views*, estes poderão entrar e realizar perguntas ou votar nas questões de outras pessoas. As perguntas irão aparecer em ordem de popularidade para o *host* responder.
 

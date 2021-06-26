@@ -12,6 +12,7 @@ import "../styles/auth.scss";
 
 export function NewRoom() {
   const { user } = useAuth(); // busca o contexto do usuário
+  console.log(user);
   const [newRoom, setNewRoom] = useState("");
   const history = useHistory();
 
@@ -29,7 +30,7 @@ export function NewRoom() {
       authorId: user?.id,
     });
 
-    history.push(`/rooms/${firebaseRoom.key}`) // redireciona o usuário para a sala, key é a id no banco de dados
+    history.push(`/admin/rooms/${firebaseRoom.key}`) // redireciona o usuário para a sala, key é a id no banco de dados
   }
 
   return (

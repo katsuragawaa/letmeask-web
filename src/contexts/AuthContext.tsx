@@ -33,6 +33,7 @@ export function AuthContextProvider(props: AuthContextProviderChildren) {
         if (!displayName || !photoURL) {
           throw new Error("Missing info from Google");
         }
+        console.log(uid);
 
         setUser({
           id: uid,
